@@ -1,0 +1,17 @@
+<JavaCardProject name="Plane Card">
+<USER>
+<PKG name="pin" aid="11 22 33 44 55 01" major="1" minor="0">
+<APPLET aid="11 22 33 44 55 01 01" instanceaid="" parameter="" authority="" privileges="" index="31232" name="pin"/>
+</PKG>
+<PKG name="information" aid="11 22 33 44 55 02" major="1" minor="0">
+<APPLET aid="11 22 33 44 55 02 01" instanceaid="" parameter="" authority="" privileges="" index="16208" name="information"/>
+</PKG>
+<PKG name="main" aid="11 22 33 44 55 04" major="1" minor="0">
+<APPLET aid="11 22 33 44 55 04 01" instanceaid="" parameter="" authority="" privileges="" index="-18648" name="main"/>
+</PKG>
+<Libs/>
+</USER>
+<DebugInfo>
+<Protocol name="T1"/>
+</DebugInfo>
+</JavaCardProject>
