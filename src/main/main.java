@@ -18,7 +18,6 @@ public class main extends Applet implements ExtendedLength{
     private static final byte INS_RESET_PIN = (byte) 0x03;
     private static final byte INS_UNBLOCK_PIN = (byte) 0x04;
     private static final byte INS_ENTER = (byte) 0x05;
-    private static final byte INS_PRINT_LENGTH = (byte) 0x06;
     private static final byte INS_PRINT = (byte) 0x07;
     private static final byte INS_CHANGE = (byte) 0x08;
     private static final byte INS_ADD_TICKET = (byte) 0x09;
@@ -52,13 +51,15 @@ public class main extends Applet implements ExtendedLength{
 	private static short AES_KEY_LENGTH = (short) (KeyBuilder.LENGTH_AES_128 / 8);
 	private byte[] hashValue;
 	private Signature rsaSig;
+	private AESKey aesKey;
 	
 	private static final short HASH_LENGTH = (short) 20;
 	
 	private main() {
-		sha = MessageDigest.getInstance(MessageDigest.ALG_SHA, true);
-		cipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_ECB_NOPAD, true);
+		sha = MessageDigest.getInstance(MessageDigest.ALG_SHA, false);
+		cipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_ECB_NOPAD, false);
 		rsaSig = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
+		aesKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES_TRANSIENT_RESET, KeyBuilder.LENGTH_AES_128, false);
 	}
 
 	
@@ -88,9 +89,6 @@ public class main extends Applet implements ExtendedLength{
 				break;
 			case INS_ENTER:
 				saveInfor(apdu, buf, recvLen);
-				break;
-			case INS_PRINT_LENGTH:
-				printLength(apdu, buf);
 				break;
 			case INS_PRINT:
 				printInfor(apdu, buf);
@@ -270,7 +268,7 @@ public class main extends Applet implements ExtendedLength{
 							destOff += MAX_LENGTH_COPY;
 							len -= MAX_LENGTH_COPY;
 						}
-						sio.updateImage(data);
+						sio.updateImage(encryptImage(data));
 						break;
 					}
 				}
@@ -289,32 +287,6 @@ public class main extends Applet implements ExtendedLength{
 			}
 			sio.updateImage(encryptImage(data));
 		}
-    }
-    
-    private void printLength(APDU apdu, byte[] buf) {
-    	checkPinValidated();
-	    InformationInterface sio = (InformationInterface) getSIO(inforAID);
-	    byte[] cardId = decryptAES(sio.getCardId());
-	    byte[] name = decryptAES(sio.getName());
-	    byte[] birthday = decryptAES(sio.getBirthday());
-	    byte[] address = decryptAES(sio.getAddress());
-	    byte[] phone = decryptAES(sio.getPhoneNumber());
-	    byte[] image = decryptAES(sio.getImage());
-	    short cardIdLen = (short) cardId.length;
-	    short nameLen = (short) name.length;
-	    short birthdayLen = (short) birthday.length;
-	    short addressLen = (short) address.length;
-	    short phoneLen = (short) phone.length;
-	    short imageLen = (short) image.length;
-	    short len = (short) (cardIdLen + nameLen + birthdayLen + addressLen + phoneLen + imageLen + 5); 
-	    byte[] send = new byte[2];
-		send[0] = (byte) ((len >> 8) & 0xFF); 
-		send[1] = (byte) (len & 0xFF);        
-
-		apdu.setOutgoing();                      
-		apdu.setOutgoingLength((short) send.length);
-		apdu.sendBytesLong(send, (short) 0, (short) send.length);
-		
     }
     
     private void printInfor(APDU apdu, byte[] buf) {
@@ -618,7 +590,6 @@ public class main extends Applet implements ExtendedLength{
     private void initAES(byte mode) {
 	    byte[] key = new byte[AES_KEY_LENGTH];
 		Util.arrayCopy(hashValue, (short) 0, key, (short) 0, AES_KEY_LENGTH);
-		AESKey aesKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES_TRANSIENT_RESET, KeyBuilder.LENGTH_AES_128, false);
 		aesKey.setKey(key, (short) 0);
 		cipher.init(aesKey, mode);
     }

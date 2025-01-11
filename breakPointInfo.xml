@@ -1,1 +1,15 @@
-<breakPointInfo/>
+<breakPointInfo>
+<package>
+<name>main</name>
+<classFile>
+<name>main.java</name>
+<lines>
+<line>
+<linenumber>111</linenumber>
+<valid>1</valid>
+<invalidTimes>0</invalidTimes>
+</line>
+</lines>
+</classFile>
+</package>
+</breakPointInfo>
